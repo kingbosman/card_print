@@ -1,6 +1,7 @@
 cards/*
 venv
 __pycache__
+outputs/*
 
 # config only allow the default config
 /config/*

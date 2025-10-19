@@ -9,7 +9,6 @@ A modular Python tool for generating printable sheets of cards with precise cut 
 - **Precise cut marks**: Configurable corner marks at each card corner
 - **Flexible configuration**: All settings in easy-to-edit config file
 - **High quality**: 300 DPI output with LANCZOS resampling
-- **Modular design**: Clean code structure for easy maintenance
 
 ## Project Structure
 
@@ -36,7 +35,7 @@ card_print/
    ```bash
    python3 -m venv venv
    source venv/bin/activate
-   pip3 install -r requirements.txt
+   pip install -r requirements.txt
    ```
 
 ## Usage
@@ -53,8 +52,13 @@ card_print/
 3. **Run the generator**:
    ```bash
    source venv/bin/activate #only if not already in venv
-   python3 generate.py
+   python generate.py
    ```
+   Note: You can pass in an argument to a specific config if you don't want to overwrite the current.config
+   ```bash
+   python generate.py config/bears_card_game.config
+   ```
+
 
 4. **Find your output** in the `outputs/` folder
    - Files are timestamped: `outputs/1729534821_sheet.pdf`
@@ -76,7 +80,7 @@ Edit `config/current.config` to customize your output
 
 ### Output Formats
 
-**PDF (recommended)**:
+**PDF**:
 ```ini
 OUTPUT_FILE = output.pdf
 ```
@@ -97,7 +101,7 @@ OUTPUT_FILE = output.png
 ⚠️ **Important**: Use these settings to ensure correct card sizes:
 
 1. **Paper size**: Match your config (default: Letter 279.4mm × 215.9mm)
-2. **Orientation**: LANDSCAPE
+2. **Orientation**: Match your config (default Landscape)
 3. **Borderless printing**: ENABLED
 4. **Scale**: 100% - DO NOT SCALE OR 'FIT TO PAGE'
 5. **Quality**: Best/Maximum/High
@@ -106,7 +110,7 @@ OUTPUT_FILE = output.png
 ### Printer Dialog Checklist
 
 - [ ] Paper: LETTER (or size from config)
-- [ ] Orientation: LANDSCAPE (NOT Portrait)
+- [ ] Orientation: LANDSCAPE (or Portrait if set in config)
 - [ ] Borderless: ON
 - [ ] UNCHECK 'Fit to page'
 - [ ] UNCHECK 'Shrink to fit'
@@ -159,9 +163,13 @@ Main sheet generation logic. Contains:
 - If missing, restore from repository or recreate it
 - On first run, `current.config` will be created automatically from `default.config`
 
+## Extra notes
+- The tool is tested in a Linux environment.
+- Windows users might need to use WSL to follow along the provided steps. Don't forget to `sudo apt update && sudo apt upgrade -y`
+
 ## License
 
-This project is open source and available for personal and commercial use.
+This project is open source and available for personal use.
 
 ## Contributing
 

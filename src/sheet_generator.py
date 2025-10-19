@@ -5,6 +5,7 @@ Main logic for generating complete card sheets with multiple pages.
 """
 
 import os
+import sys
 import time
 from .config_loader import load_config
 from .page_builder import create_single_page
@@ -23,9 +24,29 @@ def generate_sheets(config_file="config/current.config"):
     # Load configuration
     config = load_config(config_file)
 
-    # Paper dimensions
-    paper_width_mm = config["PAPER_WIDTH_MM"]
-    paper_height_mm = config["PAPER_HEIGHT_MM"]
+    # Paper dimensions - apply orientation
+    base_width_mm = config["PAPER_WIDTH_MM"]
+    base_height_mm = config["PAPER_HEIGHT_MM"]
+    orientation = config.get("PAPER_ORIENTATION", "landscape").lower()
+
+    # Swap dimensions if portrait orientation
+    if orientation == "portrait":
+        # Swap to portrait (taller than wide)
+        if base_width_mm > base_height_mm:
+            paper_width_mm = base_height_mm
+            paper_height_mm = base_width_mm
+        else:
+            paper_width_mm = base_width_mm
+            paper_height_mm = base_height_mm
+    else:  # landscape
+        # Swap to landscape (wider than tall)
+        if base_width_mm < base_height_mm:
+            paper_width_mm = base_height_mm
+            paper_height_mm = base_width_mm
+        else:
+            paper_width_mm = base_width_mm
+            paper_height_mm = base_height_mm
+
     dpi = config["DPI"]
 
     # Convert mm to pixels
@@ -69,6 +90,18 @@ def generate_sheets(config_file="config/current.config"):
     grid_rows = config["GRID_ROWS"]
     cards_per_page = grid_cols * grid_rows
 
+    # Validate that the grid fits on the page
+    _validate_grid_fits(
+        paper_width_mm,
+        paper_height_mm,
+        card_width_mm,
+        card_height_mm,
+        gap_mm,
+        grid_cols,
+        grid_rows,
+        orientation,
+    )
+
     # Calculate how many pages we need
     total_pages = (len(image_files) + cards_per_page - 1) // cards_per_page
 
@@ -85,6 +118,7 @@ def generate_sheets(config_file="config/current.config"):
         grid_cols,
         grid_rows,
         total_pages,
+        orientation,
     )
 
     # Calculate starting position to center the grid
@@ -141,6 +175,7 @@ def generate_sheets(config_file="config/current.config"):
         start_x,
         start_y,
         mm_to_pixels,
+        orientation,
     )
 
 
@@ -151,6 +186,75 @@ def _get_image_files(image_folder):
         if file.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".bmp")):
             image_files.append(os.path.join(image_folder, file))
     return image_files
+
+
+def _validate_grid_fits(
+    paper_width_mm,
+    paper_height_mm,
+    card_width_mm,
+    card_height_mm,
+    gap_mm,
+    grid_cols,
+    grid_rows,
+    orientation,
+):
+    """
+    Validate that the card grid fits on the paper.
+
+    Exits with error message if the grid doesn't fit.
+    """
+    # Calculate total space needed
+    total_width_needed = (card_width_mm * grid_cols) + (gap_mm * (grid_cols - 1))
+    total_height_needed = (card_height_mm * grid_rows) + (gap_mm * (grid_rows - 1))
+
+    # Check if it fits
+    width_fits = total_width_needed <= paper_width_mm
+    height_fits = total_height_needed <= paper_height_mm
+
+    if not width_fits or not height_fits:
+        print(f"\n{'='*60}")
+        print(f"❌ ERROR: Grid does not fit on paper!")
+        print(f"{'='*60}")
+        print(f"Configuration:")
+        print(f"  Paper: {paper_width_mm}mm × {paper_height_mm}mm ({orientation})")
+        print(f"  Card size: {card_width_mm}mm × {card_height_mm}mm")
+        print(f"  Grid: {grid_cols} columns × {grid_rows} rows")
+        print(f"  Gap between cards: {gap_mm}mm")
+        print(f"\nSpace required:")
+        print(f"  Width needed:  {total_width_needed:.1f}mm")
+        print(f"  Height needed: {total_height_needed:.1f}mm")
+        print(f"\nSpace available:")
+        print(f"  Width available:  {paper_width_mm}mm {'✓' if width_fits else '✗ TOO SMALL'}")
+        print(f"  Height available: {paper_height_mm}mm {'✓' if height_fits else '✗ TOO SMALL'}")
+
+        # Calculate what would fit
+        max_cols = int((paper_width_mm + gap_mm) / (card_width_mm + gap_mm))
+        max_rows = int((paper_height_mm + gap_mm) / (card_height_mm + gap_mm))
+
+        print(f"\n💡 Suggestions:")
+        print(f"  • Maximum grid that fits: {max_cols} × {max_rows} cards")
+
+        if orientation == "portrait":
+            # Suggest landscape if it would help
+            landscape_max_cols = int((paper_height_mm + gap_mm) / (card_width_mm + gap_mm))
+            landscape_max_rows = int((paper_width_mm + gap_mm) / (card_height_mm + gap_mm))
+            if landscape_max_cols >= grid_cols and landscape_max_rows >= grid_rows:
+                print(f"  • Try landscape orientation instead")
+                print(f"    (would allow {landscape_max_cols} × {landscape_max_rows} cards)")
+        else:
+            # Suggest portrait if it would help
+            portrait_max_cols = int((paper_height_mm + gap_mm) / (card_width_mm + gap_mm))
+            portrait_max_rows = int((paper_width_mm + gap_mm) / (card_height_mm + gap_mm))
+            if portrait_max_cols >= grid_cols and portrait_max_rows >= grid_rows:
+                print(f"  • Try portrait orientation instead")
+                print(f"    (would allow {portrait_max_cols} × {portrait_max_rows} cards)")
+
+        print(f"  • Reduce grid size in your config file")
+        print(f"  • Use larger paper")
+        print(f"  • Use smaller cards")
+        print(f"{'='*60}\n")
+
+        sys.exit(1)
 
 
 def _print_summary(
@@ -165,6 +269,7 @@ def _print_summary(
     grid_cols,
     grid_rows,
     total_pages,
+    orientation,
 ):
     """Print initial summary of configuration."""
     paper_width_inches = paper_width_mm / 25.4
@@ -179,6 +284,7 @@ def _print_summary(
     print(
         f"✓ Paper: {paper_width_mm}mm × {paper_height_mm}mm ({paper_width_inches:.1f}\" × {paper_height_inches:.1f}\")"
     )
+    print(f"✓ Orientation: {orientation.upper()}")
     print(
         f"✓ Card size: {card_width_mm}mm × {card_height_mm}mm ({card_width_inches:.2f}\" × {card_height_inches:.2f}\")"
     )
@@ -251,6 +357,7 @@ def _print_final_summary(
     start_x,
     start_y,
     mm_to_pixels,
+    orientation,
 ):
     """Print final summary with print settings."""
     paper_width_inches = paper_width_mm / 25.4
@@ -287,7 +394,7 @@ def _print_final_summary(
     print(
         f"  ⚠️  Paper size: {paper_width_mm}mm × {paper_height_mm}mm ({paper_width_inches:.1f}\" × {paper_height_inches:.1f}\")"
     )
-    print(f"  ⚠️  Orientation: LANDSCAPE")
+    print(f"  ⚠️  Orientation: {orientation.upper()}")
     print(f"  ⚠️  Borderless printing: ENABLED")
     print(f"  ⚠️  Scale: 100% - DO NOT SCALE OR 'FIT TO PAGE'")
     print(f"  ⚠️  Quality: Best/Maximum/High")
@@ -295,7 +402,7 @@ def _print_final_summary(
     print(f"  ⚠️  Page Scaling: None/Actual Size")
     print(f"\n  In printer dialog:")
     print(f"    • Paper: Check config for exact size")
-    print(f"    • Orientation: LANDSCAPE (NOT Portrait)")
+    print(f"    • Orientation: {orientation.upper()}")
     print(f"    • Borderless: ON")
     print(f"    • UNCHECK 'Fit to page'")
     print(f"    • UNCHECK 'Shrink to fit'")
