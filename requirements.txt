@@ -1,0 +1,4 @@
+# Card Print Generator Dependencies
+
+# Image processing library
+Pillow>=10.0.0

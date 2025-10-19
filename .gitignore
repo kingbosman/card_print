@@ -1,0 +1,8 @@
+cards/*
+venv
+__pycache__
+
+# config only allow the default config
+/config/*
+!/config
+!/config/default.config
