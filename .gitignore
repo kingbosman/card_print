@@ -6,4 +6,4 @@ outputs/*
 # config only allow the default config
 /config/*
 !/config
-!/config/default.config
+!/config/default.conf

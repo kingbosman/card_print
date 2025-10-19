@@ -15,7 +15,7 @@ A modular Python tool for generating printable sheets of cards with precise cut 
 ```
 card_print/
 ├── config/
-│   └── current.config          # Configuration file
+│   └── current.conf            # Configuration file
 ├── src/
 │   ├── __init__.py             # Package initialization
 │   ├── config_loader.py        # Configuration loading
@@ -45,8 +45,8 @@ card_print/
 1. **Add your card images** to the `cards/` folder
    - Supported formats: PNG, JPG, JPEG, WEBP, BMP
 
-2. **Configure settings** in `config/current.config`
-   - On first run, if `current.config` doesn't exist, it will be automatically created from `default.config`
+2. **Configure settings** in `config/current.conf`
+   - On first run, if `current.conf` doesn't exist, it will be automatically created from `default.conf`
    - Set paper size, card dimensions, grid layout, etc.
 
 3. **Run the generator**:
@@ -54,9 +54,9 @@ card_print/
    source venv/bin/activate #only if not already in venv
    python generate.py
    ```
-   Note: You can pass in an argument to a specific config if you don't want to overwrite the current.config
+   Note: You can pass in an argument to a specific config if you don't want to overwrite the current.conf
    ```bash
-   python generate.py config/bears_card_game.config
+   python generate.py config/bears_card_game.conf
    ```
 
 
@@ -69,14 +69,14 @@ card_print/
 
 The tool uses a two-tier configuration system:
 
-- **`config/default.config`**: Template with default settings (don't modify)
-- **`config/current.config`**: Your active configuration
+- **`config/default.conf`**: Template with default settings (don't modify)
+- **`config/current.conf`**: Your active configuration
 
-**First Run**: If `current.config` doesn't exist, it's automatically created from `default.config`.
+**First Run**: If `current.conf` doesn't exist, it's automatically created from `default.conf`.
 
-- To save current config to a config fot later user use `mv config/current.config config/bears_card_game.config && cp config/default.config config/current.config` replace 'bears_card_game' with a desired name
+- To save current config to a config fot later user use `mv config/current.conf config/bears_card_game.conf && cp config/default.conf config/current.conf` replace 'bears_card_game' with a desired name
 
-Edit `config/current.config` to customize your output
+Edit `config/current.conf` to customize your output
 
 ### Output Formats
 
@@ -159,9 +159,9 @@ Main sheet generation logic. Contains:
 - Verify image format is supported (PNG, JPG, JPEG, WEBP, BMP)
 
 **Config file not found error**:
-- Ensure `config/default.config` exists in the project
+- Ensure `config/default.conf` exists in the project
 - If missing, restore from repository or recreate it
-- On first run, `current.config` will be created automatically from `default.config`
+- On first run, `current.conf` will be created automatically from `default.conf`
 
 ## Extra notes
 - The tool is tested in a Linux environment.

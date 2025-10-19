@@ -12,7 +12,7 @@ from src.sheet_generator import generate_sheets
 def main():
     """Main entry point for the card print generator."""
     # Use config file from command line if provided, otherwise use default
-    config_file = sys.argv[1] if len(sys.argv) > 1 else "config/current.config"
+    config_file = sys.argv[1] if len(sys.argv) > 1 else "config/current.conf"
     generate_sheets(config_file)
 
 

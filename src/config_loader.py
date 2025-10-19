@@ -11,9 +11,9 @@ import sys
 
 def load_config(config_file):
     """
-    Load configuration from file with fallback to default.config.
+    Load configuration from file with fallback to default.conf.
 
-    If current.config doesn't exist, copies default.config to current.config.
+    If current.conf doesn't exist, copies default.conf to current.conf.
     If neither exists, prints error and exits.
 
     Args:
@@ -24,15 +24,15 @@ def load_config(config_file):
     """
     # Check if config file exists
     if not os.path.exists(config_file):
-        # Try to fall back to default.config
+        # Try to fall back to default.conf
         config_dir = os.path.dirname(config_file)
-        default_config = os.path.join(config_dir, "default.config")
+        default_config = os.path.join(config_dir, "default.conf")
 
         if os.path.exists(default_config):
             # Copy default to current
-            print(f"⚠️  current.config not found, using default.config")
+            print(f"⚠️  current.conf not found, using default.conf")
             shutil.copy(default_config, config_file)
-            print(f"✓ Copied default.config to current.config")
+            print(f"✓ Copied default.conf to current.conf")
         else:
             # Neither exists - error and exit
             print(f"❌ ERROR: Configuration file not found!")
@@ -40,7 +40,7 @@ def load_config(config_file):
             print(f"     - {config_file}")
             print(f"     - {default_config}")
             print(
-                f"\n   Please create a config file or restore default.config (from github)"
+                f"\n   Please create a config file or restore default.conf (from github)"
             )
             sys.exit(1)
 

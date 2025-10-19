@@ -11,14 +11,14 @@ from .config_loader import load_config
 from .page_builder import create_single_page
 
 
-def generate_sheets(config_file="config/current.config"):
+def generate_sheets(config_file="config/current.conf"):
     """
     Creates sheets with cards arranged in a grid based on config settings.
     Supports unlimited cards - creates multiple PNG files or multi-page PDF.
     Cards have corner marks for precise cutting.
 
     Args:
-        config_file: Path to configuration file (default: config/current.config)
+        config_file: Path to configuration file (default: config/current.conf)
     """
 
     # Load configuration
